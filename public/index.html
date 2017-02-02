@@ -1,0 +1,68 @@
+<html>
+  <head>
+    <title>Welcome to Feathers</title>
+  </head>
+  <body>
+
+  <button id="add">add</button>
+  <div id="messages"></div>
+
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/core-js/2.1.4/core.min.js"></script>
+    <script src="//unpkg.com/feathers-client@^1.0.0/dist/feathers.js"></script>
+    <script src="socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+      // Establish a Socket.io connection to the local server
+      var socket = io();
+      // Create a client side Feathers application that uses the socket
+      // for connecting to services
+      var app = feathers();
+      app.configure(feathers.socketio(socket));
+      // Retrieve a connection to the /messages service on the server
+      // This service will use websockets for all communication
+      var messages = app.service('messages');
+
+      // Listen for when a new message has been created
+      messages.on('created', function(message) {
+        addMessage(message);
+      });
+
+      // Create a new message on the service
+      messages.find(function(err, messages){
+        renderMessages(messages.data);
+      });
+
+      var messagesElement = document.getElementById('messages');
+
+      var i = 0;
+
+      document.getElementById('add').addEventListener("click", function(){
+        messages.create({
+            text: 'lalalala' + (i++)
+        });
+      });
+
+      function renderMessages(messages){
+          messagesElement.innerHTML = '';
+
+          messages.forEach(function(message){
+              var div = document.createElement('div');
+
+              div.innerHTML = message.text;
+
+              messagesElement.appendChild(div);
+          });
+
+          messagesElement.scrollTop = messagesElement.scrollHeight;
+      }
+
+      function addMessage(message){
+        var div = document.createElement('div');
+
+        div.innerHTML = message.text;
+
+        messagesElement.appendChild(div);
+      }
+    </script>
+
+  </body>
+</html>
